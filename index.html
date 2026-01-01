@@ -2,21 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Celebramos a Cristo · Playlist 2026</title>
+
 <style>
-:root{
---accent1:#d6b35a;
---accent2:#b9953e;
---txt:rgba(255,255,255,.92);
---glass:rgba(0,0,0,.26);
---stroke:rgba(255,255,255,.14);
---shadow:0 18px 60px rgba(0,0,0,.62);
-}
 *{box-sizing:border-box}
-html,body{height:100%}
+html,body{height:100%;margin:0}
 body{
-margin:0;
 background:#050812;
 font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
 display:grid;
@@ -28,79 +20,184 @@ height:min(860px,96vh);
 border-radius:28px;
 overflow:hidden;
 position:relative;
-box-shadow:var(--shadow);
-border:1px solid rgba(255,255,255,.10);
 background:#000;
+border:1px solid rgba(255,255,255,.10);
+box-shadow:0 18px 60px rgba(0,0,0,.65);
 }
 .bg{
 position:absolute;
 inset:0;
 background:url("bg.jpg") center/cover no-repeat;
 }
+.overlay{
+position:absolute;
+inset:0;
+background:radial-gradient(ellipse at center, rgba(0,0,0,.05), rgba(0,0,0,.35));
+pointer-events:none;
+}
+.panel{
+position:absolute;
+left:16px;
+right:16px;
+bottom:128px;
+padding:14px;
+border-radius:18px;
+background:rgba(0,0,0,.30);
+border:1px solid rgba(255,255,255,.14);
+backdrop-filter:blur(10px);
+}
+.msg{
+text-align:center;
+color:rgba(255,255,255,.95);
+font-size:13px;
+margin:0 0 8px 0;
+}
+.track{
+text-align:center;
+color:#fff;
+font-weight:600;
+font-size:13px;
+margin-bottom:10px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+.progressWrap{display:flex;flex-direction:column;gap:8px;}
+input[type=range]{
+-webkit-appearance:none;
+appearance:none;
+width:100%;
+height:8px;
+border-radius:999px;
+background:rgba(255,255,255,.15);
+outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+-webkit-appearance:none;
+width:18px;height:18px;border-radius:50%;
+background:linear-gradient(180deg,#d6b35a,#b9953e);
+border:1px solid rgba(255,255,255,.2);
+}
+.timeRow{
+display:flex;
+justify-content:space-between;
+font-size:12px;
+color:rgba(255,255,255,.75);
+font-variant-numeric:tabular-nums;
+}
 .controls{
 position:absolute;
 left:50%;
 transform:translateX(-50%);
-bottom:24px;
+bottom:26px;
 display:flex;
-gap:14px;
+gap:12px;
 align-items:center;
-padding:10px 12px;
+padding:10px 14px;
 border-radius:999px;
-background:rgba(0,0,0,.26);
+background:rgba(0,0,0,.30);
 border:1px solid rgba(255,255,255,.14);
 backdrop-filter:blur(10px);
 }
 .btn{
-width:58px;
-height:58px;
-border-radius:999px;
+width:52px;height:52px;
+border-radius:50%;
 border:1px solid rgba(255,255,255,.18);
-background:rgba(0,0,0,.22);
+background:rgba(0,0,0,.25);
 display:grid;
 place-items:center;
 cursor:pointer;
+user-select:none;
 }
 .btn.primary{
-background:linear-gradient(180deg, rgba(214,179,90,.98), rgba(185,149,62,.98));
+background:linear-gradient(180deg,#d6b35a,#b9953e);
 }
+.btn:active{transform:scale(.95)}
 .play{
 width:0;height:0;
-border-top:11px solid transparent;
-border-bottom:11px solid transparent;
-border-left:18px solid rgba(10,12,20,.92);
+border-top:10px solid transparent;
+border-bottom:10px solid transparent;
+border-left:16px solid #111;
 margin-left:3px;
 }
-.pause{
-width:18px;height:22px;
-display:flex;gap:6px;
+.pause{display:flex;gap:6px}
+.pause span{width:6px;height:20px;background:#fff;border-radius:2px}
+.stop{width:16px;height:16px;background:#fff;border-radius:3px}
+.skip{
+font-size:13px;
+color:#fff;
+font-weight:700;
 }
-.pause span{
-width:6px;height:22px;
-background:rgba(255,255,255,.9);
+.pulse{
+animation:pulse 1.2s infinite;
 }
-.stop{
-width:18px;height:18px;
-background:rgba(255,255,255,.9);
+@keyframes pulse{
+0%{box-shadow:0 0 0 0 rgba(214,179,90,.35)}
+70%{box-shadow:0 0 0 14px rgba(214,179,90,0)}
+100%{box-shadow:0 0 0 0 rgba(214,179,90,0)}
 }
 </style>
 </head>
+
 <body>
 <div class="phone">
 <div class="bg"></div>
+<div class="overlay"></div>
+
+<div class="panel">
+<p class="msg" id="msg">Toca ▶ para reproducir</p>
+<div class="track">Celebramos a Cristo · Playlist</div>
+
+<div class="progressWrap">
+<input id="seek" type="range" min="0" max="1000" value="0">
+<div class="timeRow">
+<div id="tCur">0:00</div>
+<div id="tDur">0:00</div>
+</div>
+</div>
+</div>
 
 <div class="controls">
-<div class="btn primary" onclick="playAudio()"><div class="play"></div></div>
-<div class="btn" onclick="pauseAudio()"><div class="pause"><span></span><span></span></div></div>
-<div class="btn" onclick="stopAudio()"><div class="stop"></div></div>
+<div class="btn" id="back10"><div class="skip">⏮ 10</div></div>
+<div class="btn primary" id="playBtn"><div class="play"></div></div>
+<div class="btn" id="pauseBtn"><div class="pause"><span></span><span></span></div></div>
+<div class="btn" id="stopBtn"><div class="stop"></div></div>
+<div class="btn" id="fwd10"><div class="skip">10 ⏭</div></div>
 </div>
+
+<audio id="audio" preload="metadata" playsinline></audio>
 </div>
 
 <script>
-const audio = new Audio("https://www.dropbox.com/scl/fi/yzxzmyzt7pef497itbd5b/playlist.mp3?rlkey=9navirys6s9n87k1b8a274sao&raw=1");
-function playAudio(){ audio.play(); }
-function pauseAudio(){ audio.pause(); }
-function stopAudio(){ audio.pause(); audio.currentTime=0; }
+const AUDIO_URL="https://dl.dropboxusercontent.com/scl/fi/yzxzmyzt7pef497itbd5b/playlist.mp3?rlkey=9navirys6s9n87k1b8a274sao&raw=1";
+const audio=document.getElementById("audio");
+audio.src=AUDIO_URL;
+
+const msg=document.getElementById("msg");
+const seek=document.getElementById("seek");
+const tCur=document.getElementById("tCur");
+const tDur=document.getElementById("tDur");
+const playBtn=document.getElementById("playBtn");
+
+function fmt(s){
+if(!isFinite(s)||s<0)return"0:00";
+return Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+}
+
+playBtn.onclick=()=>audio.play().then(()=>{msg.textContent="Reproduciendo";playBtn.classList.add("pulse")});
+document.getElementById("pauseBtn").onclick=()=>{audio.pause();msg.textContent="Pausado";playBtn.classList.remove("pulse")};
+document.getElementById("stopBtn").onclick=()=>{audio.pause();audio.currentTime=0;msg.textContent="Detenido";playBtn.classList.remove("pulse")};
+
+document.getElementById("back10").onclick=()=>audio.currentTime=Math.max(0,audio.currentTime-10);
+document.getElementById("fwd10").onclick=()=>audio.currentTime=Math.min(audio.duration,audio.currentTime+10);
+
+audio.onloadedmetadata=()=>tDur.textContent=fmt(audio.duration);
+audio.ontimeupdate=()=>{
+tCur.textContent=fmt(audio.currentTime);
+seek.value=audio.duration?Math.round((audio.currentTime/audio.duration)*1000):0;
+};
+seek.oninput=()=>audio.currentTime=(seek.value/1000)*audio.duration;
+audio.onended=()=>{msg.textContent="Finalizado";playBtn.classList.remove("pulse")};
 </script>
 </body>
 </html>
